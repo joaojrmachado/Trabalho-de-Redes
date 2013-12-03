@@ -77,10 +77,11 @@ public class Servidor {
                 */
 
                //System.out.println(clienteComando);
-               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
                my_obj = new JSONObject(clienteComando);
+               //ping
                if(my_obj.getString("command").equals("ping")){ //{protocol:”pcmj”, command:”ping”, sender:”<IP>”,receptor:”<IP>”}
-//ARRUMAR AQUI archive-request
+//ARRUMAR AQUI ping
                    //feedback: {protocol:”pcmj”, command:”pong”,status:”<CODIGO>”,  sender:”<IP>”,receptor:”<IP>”}
                     my_obj = new JSONObject();
                     my_obj.put("protocol", "pcmj"); 
@@ -88,8 +89,7 @@ public class Servidor {
                     my_obj.put("status", "100"); 
                     my_obj.put("sender", "localhost");
                     my_obj.put("receptor", "<IP>");
-                    
-                   
+                                       
                     outToClient.writeBytes(my_obj.toString()+"\n"); 
                     //System.out.println(json_string);
                     
@@ -101,7 +101,7 @@ public class Servidor {
                }else if(my_obj.getString("command").equals("authenticate")){ // {protocol:”pcmj”, command:”authenticate”, passport:”<PASSPORT>, ”sender:”<IP>”, receptor:”<IP>”}
                    
                    //feedback: {protocol:”pcmj”, command:”authenticate-back”,status:”<CODIGO>”,”sender:”<IP>”,receptor:”<IP>”}
-                   //falta: 501
+                   //falta: 501 como eu coloco o nao implementado?
                    if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("passport").length() > 0 && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
                       my_obj = new JSONObject();
                    
@@ -143,7 +143,10 @@ public class Servidor {
                else if(my_obj.getString("command").equals("archive-list")){ // {“protocol”:”pcmj”, ”command”:”archive-list”, “sender”:”<IP>”,”receptor”:”<IP>”}
 
                    //feedback: {protocol:”pcmj”, command:”archive-list-back”, status:”<CODIGO>”, back:”file:[id:”1”, nome:”file.txt”, size:”200”], folder:[ name:”pasta”, id:”2”, file:[id:”3”, nome:”file1.txt”, size:”100KB”]] sender:”<IP>”,receptor:”<IP>”}
+                   //feedback: {"protocol":"pcmj", "status":200, "receptor":"200.196.154.1","command":"archive-list-back", "back":[{"id":3,"name":"valdirene"}, {"id":3,"name":"valdirene"}, {"id":3,"name":"valdirene"}], “sender”=”200.192.154.1”}
+                    
                    //400
+                   //status: 200 ok, 400,401,501
                    if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
                        my_obj = new JSONObject();
 
@@ -181,6 +184,7 @@ public class Servidor {
                             my_obj.put("receptor", "<IP>");           
                             outToClient.writeBytes(my_obj.toString()+"\n"); 
                        }catch(Exception erro){
+                           //nao seria o caso de inserir aqui o cod 501 ?
                            System.out.println(erro.getMessage());
                        }
                    }else{
@@ -197,6 +201,8 @@ public class Servidor {
 //ARRUMAR AQUI archive-request
                    //feedback: {protocol:”pcmj”, command:”archive-request-back”,status:”<CODIGO>”, id:”<ID>”, http_address:”<STRING>”, size:”200”, md5:”<STRING>”, sender:”<IP>”, receptor:”<IP>”}
                    //400,408,501
+                   
+
                    
                    if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
                        my_obj = new JSONObject();
@@ -216,18 +222,15 @@ public class Servidor {
                    }else{
                        my_obj = new JSONObject();
                        my_obj.put("protocol", "pcmj"); 
-                       my_obj.put("command", "archive-list-back"); 
+                       my_obj.put("command", "archive-request-back"); 
                        my_obj.put("status", "400"); 
                        my_obj.put("sender", "localhost");
                        my_obj.put("receptor", "<IP>");
                        outToClient.writeBytes(my_obj.toString()+"\n");  
                    }
-                                                
                    
                 }
                  
-
-                
            }
        } catch (IOException e) {
            // TODO Auto-generated catch block
