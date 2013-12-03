@@ -1,0 +1,109 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package servidor;
+
+/**
+ *
+ * @author regiszanandrea
+ */
+/**
+ *
+ * @author regis
+ */
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class Servidor {
+
+   public static void main(String[] args) {
+
+       String clienteComando;
+       String capitalized ="";
+       ArrayList<String> listaPeers = new ArrayList<String>();
+       //listaPeers.add("");
+       JSONObject my_obj; // Instancia o Objeto Json
+       try {
+ 
+           // Cria um SocketServer (Socket característico de um servidor)
+           ServerSocket socket = new ServerSocket(1111);
+           
+           
+           
+           
+           while(true) {    
+    
+               /* Cria um objeto Socket, mas passando informações características de um servidor,
+                *no qual somente abre uma porta e aguarda a conexão de um cliente 
+                */
+               Socket connectionSocket = socket.accept();
+    
+               // Cria uma buffer que irá armazenar as informações enviadas pelo cliente
+               BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+    
+               // Cria uma stream de sáida para retorno das informações ao cliente
+               DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+    
+               // Faz a leitura das informações enviadas pelo cliente as amazenam na variável "clienteComando"
+               clienteComando = inFromClient.readLine();
+    
+               /* Faz uma modificação na String enviada pelo cliente, simulando um processamento em "back-end"
+                * antes de retorná-la ao cliente
+                */
+
+               //System.out.println(clienteComando);
+               
+               my_obj = new JSONObject(clienteComando);
+               if(my_obj.getString("command").equals("ping")){
+                    //{protocol:”pcmj”, command:”pong”,status:”<CODIGO>”,  sender:”<IP>”,receptor:”<IP>”}
+                   
+                    my_obj.put("protocol", "pcmj"); 
+                    my_obj.put("command", "pong"); 
+                    my_obj.put("status", "100"); 
+                    my_obj.put("sender", "localhost");
+                    my_obj.put("receptor", "<IP>");
+                    
+                    String json_string = my_obj.toString(); // Converte o objeto json para uma String 
+                    outToClient.writeBytes(json_string+"\n"); 
+                    //System.out.println(json_string);
+                      
+               }else if(my_obj.getString("command").equals("authenticate")){
+                    //{protocol:”pcmj”, command:”authenticate”, passport:”<PASSPORT>, ”sender:”<IP>”, receptor:”<IP>”}
+                   
+                   
+                   
+                   if(my_obj.getString("passport").equals("DiJqWHqKtiDgZySAv7ZX")){
+                       //{protocol:”pcmj”, command:”authenticate-back”,status:”<CODIGO>”,”sender:”<IP>”,receptor:”<IP>”}
+                       my_obj.put("protocol", "pcmj"); 
+                       my_obj.put("command", "authenticate"); 
+                       my_obj.put("status", "200"); 
+                       my_obj.put("sender", "localhost");
+                       my_obj.put("receptor", "<IP>");
+                   }
+                    
+                   String json_string = my_obj.toString(); // Converte o objeto json para uma String 
+                   outToClient.writeBytes(json_string+"\n"); 
+                    //System.out.println(json_string);
+               }else if(my_obj.getString("command").equals("agent_list")){
+                   //{protocol:”pcmj”, command:”agent-list”, sender:”<IP>”, receptor:”<IP>”}
+                   
+               }
+               
+               
+               
+           } 
+      
+       } catch (IOException e) {
+           // TODO Auto-generated catch block
+           e.printStackTrace();
+       }  
+   }
+}
