@@ -30,7 +30,7 @@ public class Servidor {
     
        ArrayList<String> listaPeers = new ArrayList<String>();
        //listaPeers.add("");
-       
+       ArrayList<String> arquivos = new ArrayList<String>();
        JSONObject my_obj; // Instancia o Objeto Json
        boolean autenticado = false;
        try {
@@ -63,6 +63,7 @@ public class Servidor {
                my_obj = new JSONObject(clienteComando);
                if(my_obj.getString("command").equals("ping")){
                     //{protocol:”pcmj”, command:”pong”,status:”<CODIGO>”,  sender:”<IP>”,receptor:”<IP>”}
+                    my_obj = new JSONObject();
                     my_obj.put("protocol", "pcmj"); 
                     my_obj.put("command", "pong"); 
                     my_obj.put("status", "100"); 
@@ -80,32 +81,47 @@ public class Servidor {
                       
                }else if(my_obj.getString("command").equals("authenticate")){
                    //{protocol:”pcmj”, command:”authenticate-back”,status:”<CODIGO>”,”sender:”<IP>”,receptor:”<IP>”}
-                   my_obj.put("protocol", "pcmj"); 
-                   my_obj.put("command", "authenticate-back"); 
+                   //400,501
+                   if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("status").length() > 0 && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
+                      my_obj = new JSONObject();
                    
-                   if(my_obj.getString("passport").equals("DiJqWHqKtiDgZySAv7ZX")){ 
-                       my_obj.put("status", "200"); 
-                       autenticado = true;
-                   }else{
-                        my_obj.put("status", "203"); 
-                       autenticado = false;
-                   }
-                   my_obj.put("sender", "localhost");
-                   my_obj.put("receptor", "<IP>");
-                   outToClient.writeBytes(my_obj.toString()+"\n"); 
-               }
-                // Isso é o servidor principal que fará isso                     
+                      my_obj.put("protocol", "pcmj"); 
+                      my_obj.put("command", "authenticate-back"); 
 
+                      if(my_obj.getString("passport").equals("DiJqWHqKtiDgZySAv7ZX")){ 
+                          my_obj.put("status", "200"); 
+                          autenticado = true;
+                      }else{
+                          my_obj.put("status", "203"); 
+                          autenticado = false;
+                      }
+                      my_obj.put("sender", "localhost");
+                      my_obj.put("receptor", "<IP>");
+                      outToClient.writeBytes(my_obj.toString()+"\n");  
+                   }else{
+                        my_obj = new JSONObject();
+                        my_obj.put("protocol", "pcmj"); 
+                        my_obj.put("command", "authenticate-back"); 
+                        my_obj.put("status", "400"); 
+                        my_obj.put("sender", "localhost");
+                        my_obj.put("receptor", "<IP>");
+                   }
+                   
+                   
+               }
+               /* Isso é o servidor principal que fará isso                     
                else if(my_obj.getString("command").equals("agent-list")){
                    //{protocol:”pcmj”, command:”agent-list”, sender:”<IP>”, receptor:”<IP>”}
                    //InetAddress IP=InetAddress.getLocalHost();
                    //System.out.println("IP of my system is := "+IP.getHostAddress());
-               }else if(my_obj.getString("command").equals("archive-list")){
+               }*/else if(my_obj.getString("command").equals("archive-list")){
                    //{protocol:”pcmj”, command:”archive-list-back”, status:”<CODIGO>”, back:”file:[id:”1”, nome:”file.txt”, size:”200”], folder:[ name:”pasta”, id:”2”, file:[id:”3”, nome:”file1.txt”, size:”100KB”]] sender:”<IP>”,receptor:”<IP>”}
+                   //400
+                   my_obj = new JSONObject();
+
                    try{
                         my_obj.put("protocol", "pcmj"); 
                         my_obj.put("command", "archive-list-back"); 
-                        
                         if(autenticado){
                             my_obj.put("status", "200"); 
                             File folder = new File("/home/regis/pcmj/");
@@ -119,13 +135,14 @@ public class Servidor {
                                     aux.put("nome", file.getName());
                                     aux.put("size",file.length());
                                     novo.put("file", aux);
+                                    arquivos.add(i,"/home/regis/pcmj/"+ file.getName());
                                     //System.out.println(file.getName());
                                 }
                                 //my_obj.put("generos", my_genres);
                                 i++;
                             }
                             my_obj.put("back", novo);
-                        }else if(false){
+                        }else if(arquivos.isEmpty()){
                             my_obj.put("status", "400"); // ???
                         }else if(!autenticado){
                             my_obj.put("status", "401"); 
@@ -139,7 +156,24 @@ public class Servidor {
                    }catch(Exception erro){
                        System.out.println(erro.getMessage());
                    }
-               }else{
+               }else if(my_obj.getString("command").equals("archive-request")){
+                   //{protocol:”pcmj”, command:”archive-request-back”,status:”<CODIGO>”, id:”<ID>”, http_address:”<STRING>”, size:”200”, md5:”<STRING>”, sender:”<IP>”, receptor:”<IP>”}
+                   //400,408,501
+                   my_obj = new JSONObject();
+                   my_obj.put("protocol", "pcmj"); 
+                   my_obj.put("command", "archive-request-back");
+                  
+                   if(!autenticado){
+                      my_obj.put("status","401");
+                   }else{
+                       File folder = new File(arquivos.get(Integer.parseInt(my_obj.getString("id")))); 
+                       if(folder.isFile()){
+                          my_obj.put("status","302");
+                       }else{
+                          my_obj.put("status","404");
+                       }
+                   }                                 
+                }else{
                     my_obj.put("status", "400"); 
 
                 }

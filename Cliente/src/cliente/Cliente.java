@@ -46,39 +46,54 @@ public class Cliente {
              
               my_obj = new JSONObject(); // Instancia o Objeto Json
              // Atribui as informações armazenadas no buffer do teclado à variável "comando"
-             comando = sc.nextLine();
+             
             // System.out.println(comando.equals("ping"));
-             switch(comando){
-                 case "ping":
-                    //{protocol:”pcmj”, command:”ping”, sender:”<IP>”,receptor:”<IP>”}
-                    my_obj.put("protocol", "pcmj"); 
-                    my_obj.put("command", "ping"); 
-                    my_obj.put("sender", "<IP>");
-                    my_obj.put("receptor", "localhost");
-                    break;
-                 case "authenticate":
-                    //{protocol:”pcmj”, command:”authenticate”, passport:”<PASSPORT>, ”sender:”<IP>”, receptor:”<IP>”}
-                    my_obj.put("protocol", "pcmj"); 
-                    my_obj.put("command", "authenticate");
-                    my_obj.put("passport", "DiJqWHqKtiDgZySAv7ZX");
-                    my_obj.put("sender", "<IP>");
-                    my_obj.put("sender", "localhost");
-                    break;
-                 case "agent-list":
-                    //{protocol:”pcmj”, command:”agent-list”, sender:”<IP>”, receptor:”<IP>”}
-                    my_obj.put("protocol", "pcmj"); 
-                    my_obj.put("command", "agent-list");
-                    my_obj.put("sender", "<IP>");
-                    my_obj.put("sender", "localhost");
-                    break;
-                 case "archive-list":
-                    //{protocol:”pcmj”, command:”archive-list”, sender:”<IP>”,receptor:”<IP>”}
-                    break;
-                 default:
-                    System.out.println("Comando inválido");
-                    break;
-             }
-         
+             boolean comandoInvalido = true;
+             while(comandoInvalido){
+                comando = sc.nextLine();
+                switch(comando){
+                    case "ping":
+                       //{protocol:”pcmj”, command:”ping”, sender:”<IP>”,receptor:”<IP>”}
+                       my_obj.put("protocol", "pcmj"); 
+                       my_obj.put("command", "ping"); 
+                       my_obj.put("sender", "<IP>");
+                       my_obj.put("receptor", "localhost");
+                       comandoInvalido = false;
+                       break;
+                    case "authenticate":
+                       //{protocol:”pcmj”, command:”authenticate”, passport:”<PASSPORT>, ”sender:”<IP>”, receptor:”<IP>”}
+                       my_obj.put("protocol", "pcmj"); 
+                       my_obj.put("command", "authenticate");
+                       my_obj.put("passport", "DiJqWHqKtiDgZySAv7ZX");
+                       my_obj.put("sender", "<IP>");
+                       my_obj.put("sender", "localhost");
+                       comandoInvalido = true;
+                       break;
+                    case "agent-list":
+                       //{protocol:”pcmj”, command:”agent-list”, sender:”<IP>”, receptor:”<IP>”}
+                       my_obj.put("protocol", "pcmj"); 
+                       my_obj.put("command", "agent-list");
+                       my_obj.put("sender", "<IP>");
+                       my_obj.put("sender", "localhost");
+                       comandoInvalido = true;
+                       break;
+                    case "archive-list":
+                       //{protocol:”pcmj”, command:”archive-list”, sender:”<IP>”,receptor:”<IP>”}
+                       comandoInvalido = true;
+                       break;
+                    case "end-connection":
+                        //{protocol:”pcmj”, command:”end-connection”, sender:”<IP>”, receptor:”<IP>”}
+                        my_obj.put("protocol", "pcmj"); 
+                        my_obj.put("command", "end-connection");
+                        my_obj.put("sender", "<IP>");
+                        my_obj.put("sender", "localhost");
+                        comandoInvalido = true;
+                        break;
+                    default:
+                       System.out.println("Comando inválido");
+                       break;
+                }
+              }
              // Disponibiliza as informações contidas em "comando" para a stream de saída do cliente
              outToServer.writeBytes(my_obj.toString()+"\n");
 
