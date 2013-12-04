@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -21,6 +22,12 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /*
  * 
@@ -42,7 +49,8 @@ import org.json.JSONObject;
 
 public class Servidor {
 
-   public static void main(String[] args) {
+   public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+       
 
        String clienteComando,capitalized = "";
     
@@ -83,32 +91,18 @@ public class Servidor {
                if(my_obj.getString("command").equals("ping")){ //{protocol:”pcmj”, command:”ping”, sender:”<IP>”,receptor:”<IP>”}
 //ARRUMAR AQUI ping
                    //feedback: {protocol:”pcmj”, command:”pong”,status:”<CODIGO>”,  sender:”<IP>”,receptor:”<IP>”}
-                     if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
+                     
                       my_obj = new JSONObject();
                    
                       my_obj.put("protocol", "pcmj"); 
-                      my_obj.put("command", "pong"); 
-
-                      if(my_obj.getString("passport").equals("DiJqWHqKtiDgZySAv7ZX")){ 
-                          my_obj.put("status", "200"); 
-                          autenticado = true;
-                      }else{
-                          my_obj.put("status", "203"); 
-                          autenticado = false;
-                      }
+                      my_obj.put("command", "pong");                     
+                      my_obj.put("status", "100");                          
                       my_obj.put("sender", "localhost");
                       my_obj.put("receptor", "<IP>");
                       outToClient.writeBytes(my_obj.toString()+"\n");  
-                   }else{
-                        my_obj.put("protocol", "pcmj"); 
-                        my_obj.put("command", "pong"); 
-                        my_obj.put("status", "100"); 
-                        my_obj.put("sender", "localhost");
-                        my_obj.put("receptor", "<IP>");
-                        outToClient.writeBytes(my_obj.toString()+"\n");  
-                   }
+                   
                                        
-                    outToClient.writeBytes(my_obj.toString()+"\n"); 
+                    
                     //System.out.println(json_string);
                     
                     //connectionSocket.getInetAddress()
@@ -221,28 +215,35 @@ public class Servidor {
                    //408,501
                    
                    if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
+                       int id = Integer.parseInt(my_obj.getString("id"));
                        my_obj = new JSONObject();
                        my_obj.put("protocol", "pcmj"); 
                        my_obj.put("command", "archive-request-back");
                        //
-                       my_obj.put("status", "");
-                       my_obj.put("id", "");
-                       my_obj.put("http_address", "localhost/");
-                       my_obj.put("size", "");
-                       my_obj.put("md5", "");
-                       my_obj.put("sender", "localhost");
-                       my_obj.put("receptor", "<IP>");
                        
+                       File arquivo = new File(arquivos.get(Integer.parseInt(my_obj.getString("id")))); 
                        if(!autenticado){
                           my_obj.put("status","401");
                        }else{
-                           File folder = new File(arquivos.get(Integer.parseInt(my_obj.getString("id")))); 
-                           if(folder.isFile()){
+                           
+                           if(arquivo.isFile()){
                               my_obj.put("status","302");
                            }else{
                               my_obj.put("status","404");
                            }
-                       }    
+                       } 
+                       MessageDigest md = MessageDigest.getInstance("MD5");
+                       try (InputStream is = Files.newInputStream(Paths.get(arquivos.get(Integer.parseInt(my_obj.getString("id")))))) {
+                         DigestInputStream dis = new DigestInputStream(is, md);
+                       }
+                       
+                       my_obj.put("status", "");
+                       my_obj.put("id", id);
+                       my_obj.put("http_address", "");
+                       my_obj.put("size",arquivo.length());
+                       my_obj.put("md5", md.digest().toString());
+                       my_obj.put("sender", "localhost");
+                       my_obj.put("receptor", "<IP>");
                    }else{
                        my_obj = new JSONObject();
                        my_obj.put("protocol", "pcmj"); 
