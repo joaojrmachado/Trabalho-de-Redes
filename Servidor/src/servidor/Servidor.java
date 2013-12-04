@@ -83,12 +83,30 @@ public class Servidor {
                if(my_obj.getString("command").equals("ping")){ //{protocol:”pcmj”, command:”ping”, sender:”<IP>”,receptor:”<IP>”}
 //ARRUMAR AQUI ping
                    //feedback: {protocol:”pcmj”, command:”pong”,status:”<CODIGO>”,  sender:”<IP>”,receptor:”<IP>”}
-                    my_obj = new JSONObject();
-                    my_obj.put("protocol", "pcmj"); 
-                    my_obj.put("command", "pong"); 
-                    my_obj.put("status", "100"); 
-                    my_obj.put("sender", "localhost");
-                    my_obj.put("receptor", "<IP>");
+                     if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
+                      my_obj = new JSONObject();
+                   
+                      my_obj.put("protocol", "pcmj"); 
+                      my_obj.put("command", "pong"); 
+
+                      if(my_obj.getString("passport").equals("DiJqWHqKtiDgZySAv7ZX")){ 
+                          my_obj.put("status", "200"); 
+                          autenticado = true;
+                      }else{
+                          my_obj.put("status", "203"); 
+                          autenticado = false;
+                      }
+                      my_obj.put("sender", "localhost");
+                      my_obj.put("receptor", "<IP>");
+                      outToClient.writeBytes(my_obj.toString()+"\n");  
+                   }else{
+                        my_obj.put("protocol", "pcmj"); 
+                        my_obj.put("command", "pong"); 
+                        my_obj.put("status", "100"); 
+                        my_obj.put("sender", "localhost");
+                        my_obj.put("receptor", "<IP>");
+                        outToClient.writeBytes(my_obj.toString()+"\n");  
+                   }
                                        
                     outToClient.writeBytes(my_obj.toString()+"\n"); 
                     //System.out.println(json_string);
@@ -199,16 +217,22 @@ public class Servidor {
                    
                }else if(my_obj.getString("command").equals("archive-request")){ // {protocol:”pcmj”, command:”archive-request”, id:”<ID>” sender:”<IP>”,receptor:”<IP>”}
 //ARRUMAR AQUI archive-request
-                   //feedback: {protocol:”pcmj”, command:”archive-request-back”,status:”<CODIGO>”, id:”<ID>”, http_address:”<STRING>”, size:”200”, md5:”<STRING>”, sender:”<IP>”, receptor:”<IP>”}
-                   //400,408,501
-                   
-
+//feedback: {protocol:”pcmj”, command:”archive-request-back”,status:”<CODIGO>”, id:”<ID>”, http_address:”<STRING>”, size:”200”, md5:”<STRING>”, sender:”<IP>”, receptor:”<IP>”}
+                   //408,501
                    
                    if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
                        my_obj = new JSONObject();
                        my_obj.put("protocol", "pcmj"); 
                        my_obj.put("command", "archive-request-back");
-
+                       //
+                       my_obj.put("status", "");
+                       my_obj.put("id", "");
+                       my_obj.put("http_address", "localhost/");
+                       my_obj.put("size", "");
+                       my_obj.put("md5", "");
+                       my_obj.put("sender", "localhost");
+                       my_obj.put("receptor", "<IP>");
+                       
                        if(!autenticado){
                           my_obj.put("status","401");
                        }else{
