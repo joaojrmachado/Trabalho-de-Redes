@@ -57,7 +57,7 @@ public class Servidor {
        boolean autenticado = false;
        try {
  
-           // Cria um SocketServer (Socket característico de um servidor)
+          
            ServerSocket socket = new ServerSocket(9876);
         
            while(true) {    
