@@ -13,10 +13,12 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.Scanner;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Cliente {
@@ -25,6 +27,7 @@ public class Cliente {
    public static void main(String[] args) {
        Scanner sc = new Scanner(System.in);
        String comando;
+       String ip = "";
        String resultado = "";
        boolean autenticado = false;
        JSONObject my_obj;
@@ -49,7 +52,16 @@ public class Cliente {
              
             // System.out.println(comando.equals("ping"));
             
-             
+           Enumeration<NetworkInterface> nInterfaces = NetworkInterface.getNetworkInterfaces();
+
+    
+            Enumeration<InetAddress> inetAddresses = nInterfaces.nextElement().getInetAddresses();
+            while (inetAddresses.hasMoreElements()) {
+                ip = inetAddresses.nextElement().getHostAddress();
+                break;
+            }
+           
+            
             comando = sc.nextLine();
             switch(comando){
                 case "ping":
@@ -58,7 +70,6 @@ public class Cliente {
                    my_obj.put("command", "ping"); 
                    my_obj.put("sender", "<IP>");
                    my_obj.put("receptor", "localhost");
-
                    break;
                 case "authenticate":
                    //{protocol:”pcmj”, command:”authenticate”, passport:”<PASSPORT>, ”sender:”<IP>”, receptor:”<IP>”}
@@ -67,28 +78,48 @@ public class Cliente {
                    my_obj.put("passport", "DiJqWHqKtiDgZySAv7ZX");
                    my_obj.put("sender", "<IP>");
                    my_obj.put("receptor", "localhost");
-
                    break;
                 case "agent-list":
                    //{protocol:”pcmj”, command:”agent-list”, sender:”<IP>”, receptor:”<IP>”}
-                   my_obj.put("protocol", "pcmj"); 
-                   my_obj.put("command", "agent-list");
-                   my_obj.put("sender", "<IP>");
-                   my_obj.put("receptor", "localhost");
-
+                   if(autenticado){                       
+                        my_obj.put("protocol", "pcmj"); 
+                        my_obj.put("command", "agent-list");
+                        my_obj.put("sender", "<IP>");
+                        my_obj.put("receptor", "localhost");
+                   }else{
+                       System.out.println("Você não está autenticado");
+                   }
                    break;
                 case "archive-list":
                    //{protocol:”pcmj”, command:”archive-list”, sender:”<IP>”,receptor:”<IP>”}
-
+                   if(autenticado){ 
+                        my_obj.put("protocol", "pcmj"); 
+                        my_obj.put("command", "agent-list");
+                        my_obj.put("sender", "<IP>");
+                        my_obj.put("receptor", "localhost");
+                   }else{
+                        System.out.println("Você não está autenticado");
+                   }
                    break;
+                case "archive-request":
+                   //{protocol:”pcmj”, command:”archive-request”, id:”<ID>” sender:”<IP>”,receptor:”<IP>”}
+
+                   if(autenticado){ 
+                        my_obj.put("protocol", "pcmj"); 
+                        my_obj.put("command", "archive-request");
+                        my_obj.put("sender", "<IP>");
+                        my_obj.put("receptor", "localhost");
+                   }else{
+                        System.out.println("Você não está autenticado");
+                   }
+                   break;       
                 case "end-connection":
                     //{protocol:”pcmj”, command:”end-connection”, sender:”<IP>”, receptor:”<IP>”}
                     my_obj.put("protocol", "pcmj"); 
                     my_obj.put("command", "end-connection");
                     my_obj.put("sender", "<IP>");
                     my_obj.put("receptor", "localhost");
-
-                    break;
+                    break;  
                 default:
                    System.out.println("Comando inválido");
                    break;
@@ -114,6 +145,8 @@ public class Cliente {
                                 System.out.println("Não autorizado");
                             }
                      }else if(objJson.getString("command").equals("agent-list-back")){
+                         
+                     }else if(objJson.getString("command").equals("archive-request-back")){
                          
                      }
                             
