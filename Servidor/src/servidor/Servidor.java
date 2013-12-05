@@ -80,9 +80,14 @@ public class Servidor {
                 * antes de retorná-la ao cliente
                 */
 
-               //System.out.println(clienteComando);
+              
+                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
                my_obj = new JSONObject(clienteComando);
+               
+              
+               
+               
                //ping
                if(my_obj.getString("command").equals("ping")){ //{protocol:”pcmj”, command:”ping”, sender:”<IP>”,receptor:”<IP>”}
 //ARRUMAR AQUI ping
@@ -111,22 +116,26 @@ public class Servidor {
                    //feedback: {protocol:”pcmj”, command:”authenticate-back”,status:”<CODIGO>”,”sender:”<IP>”,receptor:”<IP>”}
                    //falta: 501 como eu coloco o nao implementado?
                    if(my_obj.getString("protocol").equals("pcmj") && my_obj.getString("passport").length() > 0 && my_obj.getString("sender").length() > 0 && my_obj.getString("receptor").length() > 0){
-                      my_obj = new JSONObject();
+                     
+                      JSONObject my_obj2 = new JSONObject();
                    
-                      my_obj.put("protocol", "pcmj"); 
-                      my_obj.put("command", "authenticate-back"); 
+                      my_obj2.put("protocol", "pcmj"); 
+                      my_obj2.put("command", "authenticate-back"); 
 
-                      if(my_obj.getString("passport").equals("DiJqWHqKtiDgZySAv7ZX")){ 
-                          my_obj.put("status", "200"); 
+                       if(my_obj.getString("passport").equals("DiJqWHqKtiDgZySAv7ZX")){ 
+                          my_obj2.put("status", "200"); 
                           autenticado = true;
                       }else{
-                          my_obj.put("status", "203"); 
+                          my_obj2.put("status", "203"); 
                           autenticado = false;
                       }
-                      my_obj.put("sender", "localhost");
-                      my_obj.put("receptor", "<IP>");
-                      outToClient.writeBytes(my_obj.toString()+"\n");  
+                      
+                      my_obj2.put("sender", "localhost");
+                      my_obj2.put("receptor", "<IP>");
+                     
+                      outToClient.writeBytes(my_obj2.toString()+"\n");  
                    }else{
+                       
                         my_obj = new JSONObject();
                         my_obj.put("protocol", "pcmj"); 
                         my_obj.put("command", "authenticate-back"); 
@@ -250,7 +259,9 @@ public class Servidor {
                        outToClient.writeBytes(my_obj.toString()+"\n");  
                    }
                    
-                }
+               }else{
+                   
+               }
                  
            }
        } catch (IOException e) {
